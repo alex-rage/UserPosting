@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from rest_framework.generics import *
 from .serializers import *
+from ..functions import *
 
 
 class PostListView(ListAPIView):
@@ -34,21 +35,6 @@ class PostCreateAPIView(CreateAPIView):
 class PostUpdateView(RetrieveUpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-
-
-def get_token_headers(request):
-    jwt_token = request.COOKIES.get('token')
-
-    if jwt_token is None:
-        return None
-
-    headers = {'Authorization': 'Bearer ' + jwt_token}
-    return headers
-
-
-def get_view_full_url(request, view_name, args=None):
-    url = request.build_absolute_uri(location=reverse(view_name, args=args))
-    return url
 
 
 @login_required(redirect_field_name=None)
