@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Posts</title>
+</head>
+<body>
+<table border="1" align="right">
+    <tr>
+        {% if user_authenticated %}
+        <td><button onclick="location.href='{% url 'logout' %}'">Logout</button></td>
+        {% else %}
+        <td><button onclick="location.href='{% url 'login' %}'">Login</button></td>
+        {% endif %}
+        <td><button onclick="location.href='{% url 'api-index' %}'">Get token</button></td>
+    </tr>
+</table>
+
+<br><br>
+
+{% for post in posts %}
+    <table border="1">
+    <tr>
+        <td>Author:</td>
+        <td>{{ post.author.username }}</td>
+    </tr>
+    </table>
+<br>
+
+    <table border="1">
+    <tr>
+    <td>{{ post.text }}</td>
+    </tr>
+    </table>
+    <table>
+    <tr>
+        <td>Liked: </td>
+        <td>
+            {% for like in post.liked.all %}
+                {{ like.username }}
+            {% endfor %}
+        </td>
+    </tr>
+    </table>
+
+    <br>
+    {% if user_authenticated %}
+    {% if post.id in liked_posts_ids %}
+        <form action="{% url 'unlike-post' post.id %}" method="post">{% csrf_token %}
+            <button type="submit">Unlike</button>
+        </form>
+    {% else %}
+        <form action="{% url 'like-post' post.id %}" method="post">{% csrf_token %}
+            <button type="submit">Like</button>
+        </form>
+    {% endif %}
+    {% endif %}
+
+<br><br>
+{% endfor %}
+<br><br>
+
+{% if user_authenticated %}
+<button onclick="location.href='{% url 'create-post' %}'">Create post</button>
+{% endif %}
+</body>
+</html>
