@@ -58,7 +58,7 @@ def create_post_request(request):
     if headers is None:
         return HttpResponseRedirect(reverse('api-login'))
     post_url = get_view_full_url(request, 'post-create-view')
-    response = requests.post(post_url, headers=headers, json={'author': user_id, 'text': 'Hello'})
+    response = requests.post(post_url, headers=headers, json={'author': user_id, 'text': 'Hello', 'liked': []})
     return HttpResponse(response.content)
 
 
