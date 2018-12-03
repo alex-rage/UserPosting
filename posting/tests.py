@@ -1,38 +1,37 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from .models import *
 from datetime import datetime
+from rest_framework.decorators import permission_classes
 
 
 
-class MainTests(TestCase):
+
+@permission_classes(('AllowAny',))
+def test_post_api():
+    user = User.objects.create_user(username='tempuser', password='12345678')
+    client = Client()
+    user_id = user.id
     passed_str = 'Test text. Test passed'
+    response = client.post(reverse('post-create-view'), {'author': user_id, 'text': passed_str})
+    assert (passed_str in str(response.content))
+    posts_list = Post.objects.filter(text=passed_str)
+    assert (posts_list.exists == True)
+    post = posts_list.first()
+    post_id = post.id
 
-    def test_post_api(self):
-        user = User.objects.create_user(username='tempuser', password='12345678')
-        user_id = user.id
-        self.client.force_login(user=user)
-        response = self.client.post(reverse('post-create-view'), {'author': user_id, 'text': self.passed_str})
-        self.assertIn(self.passed_str, str(response.content))
-        posts_list = Post.objects.filter(text=self.passed_str)
-        self.assertTrue(posts_list.exists())
+    json_data = {'author': user_id, 'text': passed_str,
+                'liked': [{'id': user_id}], 'date': datetime.now()}
 
-        post = posts_list.first()
-        post_id = post.id
+    client.put(reverse('post-update-view', args=[post_id]), json_data, content_type='application/json')
 
-        self.client.put(reverse('post-update-view', args=[post_id]),
-                        {'author': user_id, 'text': self.passed_str,
-                         'liked': [{'id': user_id}], 'date': datetime.now()},
-                        content_type='application/json')
+    assert (user in post.liked.all())
 
-        self.assertIn(user, post.liked.all())
+    json_data['liked'] = []
 
-        self.client.put(reverse('post-update-view', args=[post_id]),
-                        {'author': user_id, 'text': self.passed_str,
-                         'liked': [], 'date': datetime.now()},
-                        content_type='application/json')
+    client.put(reverse('post-update-view', args=[post_id]), json_data, content_type='application/json')
 
-        self.assertNotIn(user, post.liked.all())
+    assert (user not in post.liked.all())
 
 
 
