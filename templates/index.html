@@ -11,6 +11,7 @@
         <td><button onclick="location.href='{% url 'logout' %}'">Logout</button></td>
         {% else %}
         <td><button onclick="location.href='{% url 'login' %}'">Login</button></td>
+        <td><button onclick="location.href='{% url 'sign-up' %}'">Sign up</button></td>
         {% endif %}
         <td><button onclick="location.href='{% url 'api-index' %}'">Get token</button></td>
     </tr>
